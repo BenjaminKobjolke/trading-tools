@@ -34,26 +34,39 @@ class Calculator
         
         // Calculate compound interest with monthly contributions
         if ($monthlyContribution > 0) {
-            // Calculate final amount with regular contributions
-            // Using formula for compound interest with regular deposits
-            $monthlyRate = pow(1 + $r, 1 / ($periodsPerYear / 12)) - 1;
-            $monthsToCalculate = $monthsRemaining;
+            // Use date-based simulation for accurate monthly contributions
+            $currentAmount = $amount;
+            $totalContributions = 0;
+            $currentDate = new \DateTime();
+            $lastMonth = (int)$currentDate->format('n');
             
-            // Initial amount grows with compound interest
-            $finalFromInitial = $amount * pow(1 + $r, $periodsToCalculate);
+            // Calculate days per period based on period type
+            $daysPerPeriod = match($period) {
+                'daily' => 1,
+                'weekly' => 7,
+                'monthly' => 30,
+                'custom' => $customDays ?? 1,
+                default => 30,
+            };
             
-            // Monthly contributions with compound interest
-            $finalFromContributions = 0;
-            if ($monthlyRate > 0) {
-                $finalFromContributions = $monthlyContribution * 
-                    ((pow(1 + $monthlyRate, $monthsToCalculate) - 1) / $monthlyRate) * 
-                    (1 + $monthlyRate);
-            } else {
-                $finalFromContributions = $monthlyContribution * $monthsToCalculate;
+            for ($periodNum = 1; $periodNum <= $periodsToCalculate; $periodNum++) {
+                // Apply growth for this period
+                $currentAmount *= (1 + $r);
+                
+                // Move to next period date
+                $currentDate->add(new \DateInterval('P' . $daysPerPeriod . 'D'));
+                $currentMonth = (int)$currentDate->format('n');
+                
+                // Add monthly contribution when we enter a new month
+                if ($currentMonth != $lastMonth) {
+                    $currentAmount += $monthlyContribution;
+                    $totalContributions += $monthlyContribution;
+                    $lastMonth = $currentMonth;
+                }
             }
             
-            $finalAmount = $finalFromInitial + $finalFromContributions;
-            $totalInvested = $amount + ($monthlyContribution * $monthsToCalculate);
+            $finalAmount = $currentAmount;
+            $totalInvested = $amount + $totalContributions;
         } else {
             // Simple compound interest without contributions
             $finalAmount = $amount * pow(1 + $r, $periodsToCalculate);
@@ -146,23 +159,39 @@ class Calculator
         
         // Calculate compound interest with monthly contributions
         if ($monthlyContribution > 0) {
-            $monthlyRate = pow(1 + $r, 1 / ($periodsPerYear / 12)) - 1;
+            // Use date-based simulation for accurate monthly contributions
+            $currentAmount = $amount;
+            $totalContributions = 0;
+            $currentDate = new \DateTime();
+            $lastMonth = (int)$currentDate->format('n');
             
-            // Initial amount grows with compound interest
-            $finalFromInitial = $amount * pow(1 + $r, $periodsToCalculate);
+            // Calculate days per period based on period type
+            $daysPerPeriod = match($period) {
+                'daily' => 1,
+                'weekly' => 7,
+                'monthly' => 30,
+                'custom' => $customDays ?? 1,
+                default => 30,
+            };
             
-            // Monthly contributions with compound interest
-            $finalFromContributions = 0;
-            if ($monthlyRate > 0) {
-                $finalFromContributions = $monthlyContribution * 
-                    ((pow(1 + $monthlyRate, $monthsToCalculate) - 1) / $monthlyRate) * 
-                    (1 + $monthlyRate);
-            } else {
-                $finalFromContributions = $monthlyContribution * $monthsToCalculate;
+            for ($periodNum = 1; $periodNum <= $periodsToCalculate; $periodNum++) {
+                // Apply growth for this period
+                $currentAmount *= (1 + $r);
+                
+                // Move to next period date
+                $currentDate->add(new \DateInterval('P' . $daysPerPeriod . 'D'));
+                $currentMonth = (int)$currentDate->format('n');
+                
+                // Add monthly contribution when we enter a new month
+                if ($currentMonth != $lastMonth) {
+                    $currentAmount += $monthlyContribution;
+                    $totalContributions += $monthlyContribution;
+                    $lastMonth = $currentMonth;
+                }
             }
             
-            $finalAmount = $finalFromInitial + $finalFromContributions;
-            $totalInvested = $amount + ($monthlyContribution * $monthsToCalculate);
+            $finalAmount = $currentAmount;
+            $totalInvested = $amount + $totalContributions;
         } else {
             // Simple compound interest without contributions
             $finalAmount = $amount * pow(1 + $r, $periodsToCalculate);
