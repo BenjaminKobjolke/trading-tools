@@ -1,0 +1,312 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="calculator-card">
+                <div class="card-header text-center py-4">
+                    <h1 class="h3 mb-2">{{ translations.title }}</h1>
+                    <p class="text-muted mb-0">{{ translations.subtitle }}</p>
+                </div>
+                
+                <div class="card-body p-4">
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle me-2" viewBox="0 0 16 16">
+                                <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                                <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z"/>
+                            </svg>
+                            {{ error }}
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post" action="{% if result %}#results{% endif %}" novalidate>
+                        <input type="hidden" name="calculate" value="1">
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label for="amount" class="form-label">{{ translations.form.amount_label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="amount" 
+                                           name="amount"
+                                           inputmode="decimal" 
+                                           placeholder="{{ translations.form.amount_placeholder }}"
+                                           value="{% if form_data.amount_input %}{{ form_data.amount_input }}{% elseif form_data.amount %}{{ lang.formatNumber(form_data.amount, 2) }}{% endif %}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 col-md-6">
+                                <label for="monthly_contribution" class="form-label">{{ translations.form.monthly_contribution_label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="monthly_contribution" 
+                                           name="monthly_contribution"
+                                           inputmode="decimal" 
+                                           placeholder="{{ translations.form.monthly_contribution_placeholder }}"
+                                           value="{% if form_data.monthly_contribution_input %}{{ form_data.monthly_contribution_input }}{% elseif form_data.monthly_contribution and form_data.monthly_contribution > 0 %}{{ lang.formatNumber(form_data.monthly_contribution, 2) }}{% endif %}">
+                                </div>
+                                <small class="text-muted">{{ translations.form.monthly_contribution_help }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label for="rate" class="form-label">{{ translations.form.rate_label }}</label>
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="rate" 
+                                           name="rate"
+                                           inputmode="decimal" 
+                                           placeholder="{{ translations.form.rate_placeholder }}"
+                                           value="{% if form_data.rate_input %}{{ form_data.rate_input }}{% elseif form_data.rate %}{{ lang.formatNumber(form_data.rate, 4) }}{% endif %}">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">{{ translations.form.period_label }}</label>
+                                <div class="period-options">
+                                    {% for period_key, period_label in translations.periods %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="radio" 
+                                                   name="period" 
+                                                   id="period_{{ period_key }}" 
+                                                   value="{{ period_key }}"
+                                                   {% if form_data.period == period_key %}checked{% endif %}>
+                                            <label class="form-check-label" for="period_{{ period_key }}">
+                                                {{ period_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4" id="custom-days-group" style="display: none;">
+                            <label for="custom_days" class="form-label">{{ translations.form.custom_days_label }}</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="custom_days" 
+                                   name="custom_days"
+                                   min="1" 
+                                   max="365" 
+                                   placeholder="{{ translations.form.custom_days_placeholder }}"
+                                   value="{{ form_data.custom_days }}">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               id="until_year_end" 
+                                               name="until_year_end"
+                                               {% if form_data.until_year_end %}checked{% endif %}>
+                                        <label class="form-check-label" for="until_year_end">
+                                            {{ translations.form.until_year_end_label }}
+                                            <small class="text-muted d-block">{{ translations.form.until_year_end_help }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               id="use_tax_allowance" 
+                                               name="use_tax_allowance"
+                                               {% if form_data.use_tax_allowance %}checked{% endif %}>
+                                        <label class="form-check-label" for="use_tax_allowance">
+                                            {{ translations.form.tax_allowance_label }}
+                                            <small class="text-muted d-block">{{ translations.form.tax_allowance_help }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-calculator me-2" viewBox="0 0 16 16">
+                                    <path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4z"/>
+                                    <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-4z"/>
+                                </svg>
+                                {{ translations.form.calculate_button }}
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if result %}
+                        <div class="results-section mt-5 pt-4" id="results">
+                            <h2 class="h5 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-graph-up me-2" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.61-5.63a.5.5 0 0 1 .704-.07z"/>
+                                </svg>
+                                {% if result.until_year_end %}
+                                    {{ translations.results.title_year_end }}
+                                {% else %}
+                                    {{ translations.results.title_year }}
+                                {% endif %}
+                            </h2>
+                            
+                            <div class="row gy-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="result-card investment-card">
+                                        <div class="result-label">{{ translations.results.total_invested }}</div>
+                                        <div class="result-value text-primary">{{ lang.formatCurrency(result.total_invested) }}</div>
+                                        <div class="result-detail">
+                                            {% if result.monthly_contribution > 0 %}
+                                                {{ translations.results.initial_amount }}: {{ lang.formatCurrency(result.initial_amount) }}<br>
+                                                {{ translations.results.contributions_amount }}: {{ lang.formatCurrency(result.total_contributions) }}
+                                            {% else %}
+                                                {{ translations.results.initial_investment_only }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 col-md-6">
+                                    <div class="result-card">
+                                        <div class="result-label">{{ translations.results.final_amount }}</div>
+                                        <div class="result-value">{{ lang.formatCurrency(result.final_amount) }}</div>
+                                        <div class="result-detail">{{ translations.results.profit }}: {{ lang.formatCurrency(result.profit) }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 col-md-6">
+                                    <div class="result-card tax-card">
+                                        <div class="result-label">{{ translations.results.tax_amount }}</div>
+                                        <div class="result-value text-warning">-{{ lang.formatCurrency(result.tax_amount) }}</div>
+                                        <div class="result-detail">
+                                            {% if result.tax_free_allowance > 0 %}
+                                                Taxable: {{ lang.formatCurrency(result.taxable_profit) }}
+                                            {% else %}
+                                                {{ translations.results.profit_after_tax }}: {{ lang.formatCurrency(result.profit_after_tax) }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 col-md-6">
+                                    <div class="result-card">
+                                        <div class="result-label">{{ translations.results.final_after_tax }}</div>
+                                        <div class="result-value text-success">{{ lang.formatCurrency(result.final_amount_after_tax) }}</div>
+                                        <div class="result-detail">
+                                            {{ translations.results.effective_annual_rate }}: {{ lang.formatNumber(result.effective_annual_rate * 100, 2) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if result.multi_year_projections and result.multi_year_projections|length > 0 %}
+                                <div class="multi-year-section mt-5 pt-4 border-top">
+                                    <h3 class="h5 mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-graph-up-arrow me-2" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5Z"/>
+                                        </svg>
+                                        {{ translations.results.multi_year_title }}
+                                    </h3>
+                                    
+                                    {% for years, projection in result.multi_year_projections %}
+                                        <div class="mb-5">
+                                            <h4 class="h6 mb-3">{{ translations.results.title }} ({{ years }} {{ translations.results.years_label }})</h4>
+                                            <div class="row gy-3">
+                                                <div class="col-12 col-md-6">
+                                                    <div class="result-card investment-card">
+                                                        <div class="result-label">{{ translations.results.total_invested }}</div>
+                                                        <div class="result-value text-primary">{{ lang.formatCurrency(projection.total_invested) }}</div>
+                                                        <div class="result-detail">
+                                                            {% if result.monthly_contribution > 0 %}
+                                                                {{ translations.results.initial_amount }}: {{ lang.formatCurrency(result.initial_amount) }}<br>
+                                                                {{ translations.results.contributions_amount }}: {{ lang.formatCurrency(projection.total_contributions) }}
+                                                            {% else %}
+                                                                {{ translations.results.initial_investment_only }}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-12 col-md-6">
+                                                    <div class="result-card">
+                                                        <div class="result-label">{{ translations.results.final_amount }}</div>
+                                                        <div class="result-value">{{ lang.formatCurrency(projection.final_amount) }}</div>
+                                                        <div class="result-detail">{{ translations.results.profit }}: {{ lang.formatCurrency(projection.profit) }}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-12 col-md-6">
+                                                    <div class="result-card tax-card">
+                                                        <div class="result-label">{{ translations.results.tax_amount }}</div>
+                                                        <div class="result-value text-warning">-{{ lang.formatCurrency(projection.tax_amount) }}</div>
+                                                        <div class="result-detail">
+                                                            {% if result.tax_free_allowance > 0 %}
+                                                                Taxable: {{ lang.formatCurrency(projection.profit > result.tax_free_allowance ? projection.profit - result.tax_free_allowance : 0) }}
+                                                            {% else %}
+                                                                {{ translations.results.profit_after_tax }}: {{ lang.formatCurrency(projection.profit_after_tax) }}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-12 col-md-6">
+                                                    <div class="result-card">
+                                                        <div class="result-label">{{ translations.results.final_after_tax }}</div>
+                                                        <div class="result-value text-success">{{ lang.formatCurrency(projection.final_amount_after_tax) }}</div>
+                                                        <div class="result-detail">
+                                                            {{ translations.results.effective_annual_rate }}: {{ lang.formatNumber(projection.effective_annual_rate * 100, 2) }}%
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="formula-info mt-5 pt-4 border-top">
+                                <h6>{{ translations.results.assumptions }}:</h6>
+                                <p>{{ translations.results.assumptions_text|replace({':periods': lang.formatNumber(result.periods_per_year, 0)}) }}</p>
+                                {% if result.until_year_end %}
+                                    <p>{{ translations.results.assumptions_months|replace({':months': lang.formatNumber(result.months_calculated, 1)}) }}</p>
+                                {% endif %}
+                                {% if result.monthly_contribution > 0 %}
+                                    <p>{{ translations.results.total_contributions }}: {{ lang.formatCurrency(result.total_contributions) }}</p>
+                                {% endif %}
+                                
+                                <h6>{{ translations.results.formula }}:</h6>
+                                <p class="formula">{{ translations.results.formula_text }}</p>
+                                <p class="small text-muted">
+                                    r = {{ lang.formatNumber(result.period_rate / 100, 4) }}, 
+                                    n = {{ lang.formatNumber(result.periods_calculated, 2) }}
+                                    {% if result.monthly_contribution > 0 %}
+                                        <br>Monthly contributions: {{ lang.formatCurrency(result.monthly_contribution) }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="small text-muted mb-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                            </svg>
+                            {{ translations.tips.input_format }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{
+    "title": "Jahresrendite-Rechner",
+    "subtitle": "Berechne die effektive Jahresrendite bei verschiedenen Verzinsungsperioden",
+    "form": {
+        "amount_label": "Startbetrag (EUR)",
+        "amount_placeholder": "z.B. 10.000,00",
+        "rate_label": "Rendite pro Periode (%)",
+        "rate_placeholder": "z.B. 1,2",
+        "period_label": "Periode",
+        "custom_days_label": "Anzahl Tage",
+        "custom_days_placeholder": "z.B. 30",
+        "monthly_contribution_label": "Monatliche Einzahlung (EUR)",
+        "monthly_contribution_placeholder": "z.B. 500,00",
+        "monthly_contribution_help": "Optional: Regelmäßige monatliche Zusatzinvestition",
+        "tax_allowance_label": "Sparerpauschbetrag (1.000 €) berücksichtigen",
+        "tax_allowance_help": "Die ersten 1.000 € Kapitalerträge sind steuerfrei",
+        "until_year_end_label": "Bis Jahresende rechnen (statt 12 Monate)",
+        "until_year_end_help": "Berechnung nur bis 31. Dezember des aktuellen Jahres",
+        "calculate_button": "Berechnen"
+    },
+    "periods": {
+        "daily": "Täglich",
+        "weekly": "Wöchentlich",
+        "monthly": "Monatlich",
+        "custom": "Benutzerdefiniert"
+    },
+    "results": {
+        "title": "Ergebnis",
+        "title_year": "Ergebnis (1 Jahr)",
+        "title_year_end": "Ergebnis (bis Jahresende)",
+        "effective_annual_rate": "Effektive Jahresrendite",
+        "compound_factor": "Aufzinsungsfaktor",
+        "final_amount": "Endbetrag",
+        "profit": "Gewinn",
+        "profit_after_tax": "Gewinn nach Steuern",
+        "final_after_tax": "Endbetrag nach Steuern",
+        "tax_amount": "Abgeltungssteuer (25%)",
+        "total_invested": "Gesamtinvestition",
+        "total_contributions": "Zusätzliche Einzahlungen",
+        "initial_amount": "Anfangsbetrag",
+        "contributions_amount": "Beiträge",
+        "initial_investment_only": "Anfangsinvestition",
+        "assumptions": "Annahmen",
+        "assumptions_text": "Zinseszins mit :periods Perioden pro Jahr",
+        "assumptions_months": "Berechnung über :months Monate",
+        "formula": "Formel",
+        "formula_text": "Endbetrag = Betrag × (1 + r)^n",
+        "multi_year_title": "Langzeit-Prognose",
+        "multi_year_subtitle": "Entwicklung über mehrere Jahre",
+        "year_label": "Jahr",
+        "years_label": "Jahre"
+    },
+    "errors": {
+        "amount_required": "Bitte einen gültigen Betrag eingeben.",
+        "amount_negative": "Der Betrag muss positiv sein.",
+        "rate_required": "Bitte eine gültige Rendite eingeben.",
+        "rate_too_low": "Die Rendite darf nicht unter -100% liegen.",
+        "contribution_negative": "Die monatliche Einzahlung darf nicht negativ sein.",
+        "ambiguous_format": "Unklares Zahlenformat. Bitte verwende entweder '1.234,56' oder '1,234.56'.",
+        "invalid_period": "Bitte eine gültige Periode wählen.",
+        "custom_days_required": "Bitte die Anzahl der Tage eingeben (1-365).",
+        "custom_days_too_high": "Die Anzahl der Tage darf maximal 365 betragen."
+    },
+    "tips": {
+        "input_format": "Tipp: Verwende Komma oder Punkt für Dezimalstellen (z.B. 1,25 oder 1.25)."
+    },
+    "language": {
+        "switch": "Sprache",
+        "de": "Deutsch",
+        "en": "English"
+    },
+    "footer": {
+        "copyright": "© 2024 Jahresrendite-Rechner"
+    }
+}
